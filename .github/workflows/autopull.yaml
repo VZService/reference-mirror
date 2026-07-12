@@ -28,7 +28,7 @@ jobs:
 
       - name: 合并上游到本地子目录（保留本地改动）
         run: |
-          git merge --squash -s recursive -Xsubtree=reference -Xours upstream/main || echo "已是最新或无变更"
+          git merge --squash -s recursive -Xsubtree=. -Xours upstream/main || echo "已是最新或无变更"
           git diff --cached --quiet || git commit -m "从上游同步更新 $(date +'%Y-%m-%d %H:%M:%S')"
         env:
           GIT_AUTHOR_NAME: github-actions[bot]
