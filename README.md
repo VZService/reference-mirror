@@ -11,8 +11,7 @@ Quick Reference
 [![Quick Reference](https://user-images.githubusercontent.com/1680273/201931931-d8559417-0a15-46af-a009-ec1e56e5b778.png)](https://jaywcjlove.github.io/reference)
 <!--rehype:ignore:end-->
 
-这是一份为中文开发者整理的技术栈速查清单，基于英文版 [Reference](https://github.com/Randy8080/reference) 翻译扩展而来，新增了更多实用内容，旨在提升查阅效率与使用体验。欢迎分享你的清单，我会尽量搬运实现；如发现内容不妥，也可通过提交 [PR](https://github.com/jaywcjlove/reference/blob/main/CONTRIBUTING.md) 进行修复或完善。项目持续更新，欢迎参与贡献！
-
+这是一份为中文开发者整理的技术栈速查清单
 
 ## AI
 
