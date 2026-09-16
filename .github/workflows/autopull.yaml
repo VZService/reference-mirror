@@ -28,7 +28,30 @@ jobs:
 
       - name: 合并上游到本地子目录（保留本地改动）
         run: |
-          git merge -s recursive -Xsubtree=reference -Xours upstream/main --squash --no-commit --allow-unrelated-histories
+          # -Xours 只能裁决「双方都改」的冲突。「本地已删 / 上游有改」这类整文件冲突(modify/delete)
+          # 不受 -Xours 影响，会直接让 merge 以 exit 1 结束、整个同步失败（2026-09-03 起连续失败的根因）。
+          # 本仓是镜像：本地删掉的上游文件（如 CONTRIBUTING.md）保持删除，故整文件冲突一律按本地为准解决。
+          git merge -s recursive -Xsubtree=reference -Xours upstream/main --squash --no-commit --allow-unrelated-histories || true
+
+          # 本地已删、上游有改(DU)：保持删除
+          git status --porcelain | awk '$1 == "DU" { print substr($0, 4) }' | while IFS= read -r f; do
+            git rm -q -f --cached --ignore-unmatch -- "$f" || true
+            rm -f -- "$f"
+          done
+
+          # 上游已删、本地有改(UD) / 双方都改(UU) / 双方都新增(AA)：保留本地版本
+          git status --porcelain | awk '$1 == "UD" || $1 == "UU" || $1 == "AA" { print substr($0, 4) }' | while IFS= read -r f; do
+            git checkout --ours -- "$f" 2>/dev/null || true
+            git add -- "$f" || true
+          done
+
+          # 兜底：若仍有未解决冲突就显式失败，避免出现「同步了但其实没同步」的假成功
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "::error::仍有未解决的合并冲突："
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+
           git commit -m "从上游同步更新 $(date +'%Y-%m-%d %H:%M:%S')" || echo "没有需要提交的变更"
         env:
           GIT_AUTHOR_NAME: github-actions[bot]
